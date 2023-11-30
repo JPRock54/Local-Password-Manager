@@ -1,6 +1,9 @@
-import hashlib
+import random, string
 
-a = "abc".encode("utf-8")
-p = hashlib.sha512(a).hexdigest()
-print(p)
-print(len(p))
+def generate_salt():
+    characters = string.ascii_letters + string.digits + string.punctuation
+    salt = [random.choice(characters) for i in range(32)]
+    return "".join(salt)
+
+p = generate_salt()
+print("kys"+p)
