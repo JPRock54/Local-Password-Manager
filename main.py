@@ -16,12 +16,16 @@ def generate_hash(word):
 
 
 # Encryption for stored passwords
-def encyrpt_password(con, cur):
+def encyrpt_password():
+    con = sqlite3.connect("account.db")
+    cur = con.cursor()
     pass
 
 
 # Decryption for stored passwords
-def decrypt_password(con, cur):
+def decrypt_password():
+    con = sqlite3.connect("account.db")
+    cur = con.cursor()
     pass
 
 
@@ -29,17 +33,19 @@ def decrypt_password(con, cur):
 def retry():
     while True:
         choice = input("Retry Login? (y/n): ").lower()
-        if choice in ["y", "n"]:
-            if choice == "n":
-                return False
-            else:
-                return True
+        if choice == "n":
+            return False
+        elif choice == "y":
+            return True
         else:
             print("Enter a valid option!")
 
 
 # Registers a new user
-def register(con, cur):
+def register():
+    con = sqlite3.connect("account.db")
+    cur = con.cursor()
+
     # Checks if username does not exist
     while True:
         username = input("Please enter in a username: ")
@@ -50,14 +56,11 @@ def register(con, cur):
             continue
 
         # Check username is not already in use
-        users = cur.execute(
-            f"""SELECT Username FROM tbl_accounts WHERE Username = '{username}'"""
-        ).fetchall()
-        try:
-            users = users[0]
-            print("User already exists")
-        except:
+        if not cur.execute(
+            f"SELECT Username FROM tbl_accounts WHERE Username = '{username}'"
+        ).fetchall():
             break
+        print("User already exists")
 
     # User enters password the password is hashed then added
     password = input("Please enter in a password: ")
@@ -77,7 +80,10 @@ def register(con, cur):
 
 
 # Login to an already exisiting user
-def login(con, cur):
+def login():
+    con = sqlite3.connect("account.db")
+    cur = con.cursor()
+
     # Login Loop
     logging_in = True
     while logging_in:
@@ -92,8 +98,7 @@ def login(con, cur):
         except:
             print("User does not exist")
             # Asks the user if they want to stop logging in
-            try_again = retry()
-            if not try_again:
+            if not retry():
                 break
             else:
                 continue
@@ -117,29 +122,31 @@ def login(con, cur):
         else:
             print("Incorrect password")
             # Asks the user if they want to stop logging in
-            try_again = retry()
-            if not try_again:
+            if not retry():
                 break
             else:
                 continue
 
 
 # Main menu
-def main_menu(con, cur):
+def main_menu():
+    # Prints main menu
     open = True
     while open:
         print(
             """
-    ###########################################
-    # Please select one of the following:     #
-    #                                         #
-    # 1. Login                                #
-    # 2. Register                             #
-    # 3. Exit to desktop                      #
-    #                                         #
-    ###########################################
+###########################################
+# Please select one of the following:     #
+#                                         #
+# 1. Login                                #
+# 2. Register                             #
+# 3. Exit to desktop                      #
+#                                         #
+###########################################
     """
         )
+
+        # Allows the user to choose their option
         choosing = True
         while choosing:
             descision = input()
@@ -152,10 +159,10 @@ def main_menu(con, cur):
             match descision:
                 case 1:
                     choosing = False
-                    login(con, cur)
+                    login()
                 case 2:
                     choosing = False
-                    register(con, cur)
+                    register()
                 case 3:
                     sys.exit(), True
                 case other:
@@ -163,9 +170,7 @@ def main_menu(con, cur):
 
 
 def main():
-    con = sqlite3.connect("account.db")
-    cur = con.cursor()
-    main_menu(con, cur)
+    main_menu()
 
 
 if __name__ == "__main__":
