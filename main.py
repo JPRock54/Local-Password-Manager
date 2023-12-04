@@ -25,6 +25,19 @@ def decrypt_password(con, cur):
     pass
 
 
+# Asks the user if they should retry logging in
+def retry():
+    while True:
+        choice = input("Retry Login? (y/n): ").lower()
+        if choice in ["y", "n"]:
+            if choice == "n":
+                return False
+            else:
+                return True
+        else:
+            print("Enter a valid option!")
+
+
 # Registers a new user
 def register(con, cur):
     # Checks if username does not exist
@@ -66,7 +79,8 @@ def register(con, cur):
 # Login to an already exisiting user
 def login(con, cur):
     # Login Loop
-    while True:
+    logging_in = True
+    while logging_in:
         username = input("Please enter in your username: ")
         users = cur.execute(
             f"""SELECT Username FROM tbl_accounts WHERE Username = '{username}'"""
@@ -77,10 +91,12 @@ def login(con, cur):
             users = users[0]
         except:
             print("User does not exist")
-            choice = input("Retry Login? (y/n): ").lower()
-            if choice == "n":
+            # Asks the user if they want to stop logging in
+            try_again = retry()
+            if not try_again:
                 break
-            continue
+            else:
+                continue
 
         # Hashes inputed Password
         password = input("Please enter your password: ")
@@ -100,9 +116,12 @@ def login(con, cur):
             break
         else:
             print("Incorrect password")
-            choice = input("Retry Login? (y/n): ").lower()
-            if choice == "n":
+            # Asks the user if they want to stop logging in
+            try_again = retry()
+            if not try_again:
                 break
+            else:
+                continue
 
 
 # Main menu
