@@ -59,7 +59,7 @@ def register():
                 continue
 
         # Checks the length of the username
-        if len(username) > 16 or len(username) < 4:
+        if not (4 <= len(username) <= 16):
             print("Username must be between 4 and 16 characters long!")
             if not retry("Registering"):
                 break
@@ -88,8 +88,8 @@ def register():
             else:
                 continue
 
-        # Cehcks password is between 8 and 32 characters
-        if 8 < len(password) < 32:
+        # Checks password is between 8 and 32 characters
+        if not (8 <= len(password) <= 32):
             print("Password must be between 8 and 32 characters!")
             if not retry("Registering"):
                 break
@@ -154,6 +154,7 @@ def login():
             ).fetchone()[0]
         ):
             print("Login Successfull")
+            login_screen(username, password)
             break
         else:
             print("Incorrect password")
@@ -166,18 +167,40 @@ def login():
 
 def login_screen(username, password):
     while True:
+        # Prints login menu
         print(
             f"""
+Hello {username} what do you want to do?   
 #############################################################
-# Hello {username} what do you want to do?                  #
 #                                                           #
-# 1. Login                                                  #
-# 2. Register                                               #
-# 3. Exit to desktop                                        #
+# 1. View Accounts                                          #
+# 2. Generate a password                                    #
+# 3. Exit to menu                                           #
 #                                                           #
 #############################################################
 """
         )
+
+        choosing = True
+        while choosing:
+            descision = input()
+            try:
+                descision = int(descision)
+            except:
+                print("\nPlease enter in a valid option")
+                continue
+
+            match descision:
+                case 1:
+                    choosing = False
+                    print("Currently WEP")
+                case 2:
+                    choosing = False
+                    print("Currently WEP")
+                case 3:
+                    main_menu()
+                case other:
+                    print("\nPlease enter in a valid option")
 
 
 # Main menu
@@ -190,9 +213,9 @@ def main_menu():
 ###########################################
 # Please select one of the following:     #
 #                                         #
-# 1. View accounts                        #
-# 2. Generate a password                  #
-# 3. Exit to menu                         #
+# 1. Login                                #
+# 2. Register                             #
+# 3. Exit to desktop                      #
 #                                         #
 ###########################################
     """
@@ -212,7 +235,6 @@ def main_menu():
                 case 1:
                     choosing = False
                     login()
-                    login_screen()
                 case 2:
                     choosing = False
                     register()
