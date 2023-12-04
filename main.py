@@ -30,9 +30,9 @@ def decrypt_password():
 
 
 # Asks the user if they should retry logging in
-def retry():
+def retry(word):
     while True:
-        choice = input("Retry Login? (y/n): ").lower()
+        choice = input(f"Retry {word}? (y/n): ").lower()
         if choice == "n":
             return False
         elif choice == "y":
@@ -53,30 +53,68 @@ def register():
         # Checks username is not blank
         if username == "":
             print("Username cannot be blank!")
-            continue
+            if not retry("Registering"):
+                break
+            else:
+                continue
+
+        # Checks the length of the username
+        if len(username) > 16 or len(username) < 4:
+            print("Username must be between 4 and 16 characters long!")
+            if not retry("Registering"):
+                break
+            else:
+                continue
 
         # Check username is not already in use
-        if not cur.execute(
+        if cur.execute(
             f"SELECT Username FROM tbl_accounts WHERE Username = '{username}'"
         ).fetchall():
-            break
-        print("User already exists")
+            print("User already exists")
+            if not retry("Registering"):
+                break
+            else:
+                continue
 
-    # User enters password the password is hashed then added
-    password = input("Please enter in a password: ")
-    salt = generate_salt()
-    hash = generate_hash(password + salt)
-    try:
-        userid = cur.execute(
-            "SELECT UserID FROM tbl_accounts ORDER BY UserID ASC"
-        ).fetchall()[-1][0]
-    except:
-        userid = 0
-    cur.execute(
-        f"""INSERT INTO tbl_accounts (UserID, Username, salt, hash) VALUES ({userid+1}, '{username}', '{salt}', '{hash}')"""
-    )
-    con.commit()
-    print("User Created!")
+        # User enters password the password is hashed then added
+
+        password = input("Please enter in a password: ")
+
+        # Checks password isn't blank
+        if password == "":
+            print("Password cannot be blank")
+            if not retry("Registering"):
+                break
+            else:
+                continue
+
+        # Cehcks password is between 8 and 32 characters
+        if 8 < len(password) < 32:
+            print("Password must be between 8 and 32 characters!")
+            if not retry("Registering"):
+                break
+            else:
+                continue
+
+        # Hashes password
+        salt = generate_salt()
+        hash = generate_hash(password + salt)
+
+        # Determines userid
+        try:
+            userid = cur.execute(
+                "SELECT UserID FROM tbl_accounts ORDER BY UserID ASC"
+            ).fetchall()[-1][0]
+        except:
+            userid = 0
+
+        # Adds user to databse
+        cur.execute(
+            f"""INSERT INTO tbl_accounts (UserID, Username, salt, hash) VALUES ({userid+1}, '{username}', '{salt}', '{hash}')"""
+        )
+        con.commit()
+        print("User Created!")
+        break
 
 
 # Login to an already exisiting user
@@ -85,8 +123,7 @@ def login():
     cur = con.cursor()
 
     # Login Loop
-    logging_in = True
-    while logging_in:
+    while True:
         username = input("Please enter in your username: ")
         users = cur.execute(
             f"""SELECT Username FROM tbl_accounts WHERE Username = '{username}'"""
@@ -97,8 +134,7 @@ def login():
             users = users[0]
         except:
             print("User does not exist")
-            # Asks the user if they want to stop logging in
-            if not retry():
+            if not retry("Login"):
                 break
             else:
                 continue
@@ -122,10 +158,26 @@ def login():
         else:
             print("Incorrect password")
             # Asks the user if they want to stop logging in
-            if not retry():
+            if not retry("Login"):
                 break
             else:
                 continue
+
+
+def login_screen(username, password):
+    while True:
+        print(
+            f"""
+#############################################################
+# Hello {username} what do you want to do?                  #
+#                                                           #
+# 1. Login                                                  #
+# 2. Register                                               #
+# 3. Exit to desktop                                        #
+#                                                           #
+#############################################################
+"""
+        )
 
 
 # Main menu
@@ -138,9 +190,9 @@ def main_menu():
 ###########################################
 # Please select one of the following:     #
 #                                         #
-# 1. Login                                #
-# 2. Register                             #
-# 3. Exit to desktop                      #
+# 1. View accounts                        #
+# 2. Generate a password                  #
+# 3. Exit to menu                         #
 #                                         #
 ###########################################
     """
@@ -160,6 +212,7 @@ def main_menu():
                 case 1:
                     choosing = False
                     login()
+                    login_screen()
                 case 2:
                     choosing = False
                     register()
@@ -169,9 +222,11 @@ def main_menu():
                     print("\nPlease enter in a valid option")
 
 
+# Main program
 def main():
     main_menu()
 
 
+# Runs program
 if __name__ == "__main__":
     main()
