@@ -1,6 +1,17 @@
 import sqlite3, hashlib, random, string, sys
 
 
+# Asks a y/n question
+def ask_question(phrase):
+    question = input(f"{phrase} (y/n): ").lower()
+    if question == "" or question == "y":
+        return True
+    elif question == "n":
+        return False
+    print("Invalid Input!")
+    ask_question(phrase)
+
+
 # Generate the salt
 def generate_salt():
     characters = string.ascii_letters + string.digits
@@ -29,18 +40,6 @@ def decrypt_password():
     pass
 
 
-# Asks the user if they should retry logging in
-def retry(word):
-    while True:
-        choice = input(f"Retry {word}? (y/n): ").lower()
-        if choice == "n":
-            return False
-        elif choice == "y":
-            return True
-        else:
-            print("Enter a valid option!")
-
-
 # Registers a new user
 def register():
     con = sqlite3.connect("account.db")
@@ -53,28 +52,25 @@ def register():
         # Checks username is not blank
         if username == "":
             print("Username cannot be blank!")
-            if not retry("Registering"):
-                break
-            else:
+            if ask_question("Retry Registering?"):
                 continue
+            break
 
         # Checks the length of the username
         if not (4 <= len(username) <= 16):
             print("Username must be between 4 and 16 characters long!")
-            if not retry("Registering"):
-                break
-            else:
+            if ask_question("Retry Registering?"):
                 continue
+            break
 
         # Check username is not already in use
         if cur.execute(
             f"SELECT Username FROM tbl_accounts WHERE Username = '{username}'"
         ).fetchall():
             print("User already exists")
-            if not retry("Registering"):
-                break
-            else:
+            if ask_question("Retry Registering?"):
                 continue
+            break
 
         # User enters password the password is hashed then added
 
@@ -83,18 +79,16 @@ def register():
         # Checks password isn't blank
         if password == "":
             print("Password cannot be blank")
-            if not retry("Registering"):
-                break
-            else:
+            if ask_question("Retry Registering?"):
                 continue
+            break
 
         # Checks password is between 8 and 32 characters
         if not (8 <= len(password) <= 32):
             print("Password must be between 8 and 32 characters!")
-            if not retry("Registering"):
-                break
-            else:
+            if ask_question("Retry Registering?"):
                 continue
+            break
 
         # Hashes password
         salt = generate_salt()
@@ -134,10 +128,9 @@ def login():
             users = users[0]
         except:
             print("User does not exist")
-            if not retry("Login"):
-                break
-            else:
+            if ask_question("Retry Login?"):
                 continue
+            break
 
         # Hashes inputed Password
         password = input("Please enter your password: ")
@@ -159,10 +152,21 @@ def login():
         else:
             print("Incorrect password")
             # Asks the user if they want to stop logging in
-            if not retry("Login"):
-                break
-            else:
+            if ask_question("Retry Login?"):
                 continue
+            break
+
+
+def view_accounts():
+    print("Currently WEP")
+
+
+def add_account():
+    print("Currently WEP")
+
+
+def generate_password():
+    print("Currently WEP")
 
 
 def login_screen(username, password):
@@ -174,8 +178,9 @@ Hello {username} what do you want to do?
 #############################################################
 #                                                           #
 # 1. View Accounts                                          #
-# 2. Generate a password                                    #
-# 3. Exit to menu                                           #
+# 2. Add Account                                            #
+# 3. Generate a password                                    #
+# 4. Exit to menu                                           #
 #                                                           #
 #############################################################
 """
@@ -193,11 +198,14 @@ Hello {username} what do you want to do?
             match descision:
                 case 1:
                     choosing = False
-                    print("Currently WEP")
+                    view_accounts()
                 case 2:
                     choosing = False
-                    print("Currently WEP")
+                    add_account()
                 case 3:
+                    choosing = False
+                    generate_password()
+                case 4:
                     main_menu()
                 case other:
                     print("\nPlease enter in a valid option")
