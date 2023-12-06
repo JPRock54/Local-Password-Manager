@@ -166,7 +166,60 @@ def add_account():
 
 
 def generate_password():
-    print("Currently WEP")
+    while True:
+        capitals = ask_question("Should the password contain capital letters?")
+        numbers = ask_question("Should the password contain numbers?")
+        special_charatcers = ask_question(
+            "Should the password contain special characters?"
+        )
+        length = input("How long should the password be? (16 by default): ")
+        if length != "":
+            try:
+                length = int(length)
+            except:
+                print("Must be a number!")
+                if ask_question("Retry?"):
+                    continue
+                break
+
+        if capitals and numbers and special_charatcers:
+            password = []
+            for i in range(0, length):
+                password.append(
+                    random.choice(
+                        string.ascii_letters + string.digits + string.punctuation
+                    )
+                )
+            return "".join(password)
+
+        elif capitals and numbers:
+            password = []
+            for i in range(0, length):
+                password.append(random.choice(string.ascii_letters + string.digits))
+            return "".join(password)
+
+        elif capitals and special_charatcers:
+            password = []
+            for i in range(0, length):
+                password.append(
+                    random.choice(string.ascii_letters + string.punctuation)
+                )
+            return "".join(password)
+
+        elif numbers and special_charatcers:
+            password = []
+            for i in range(0, length):
+                password.append(
+                    random.choice(
+                        string.ascii_lowercase + string.digits + string.punctuation
+                    )
+                )
+            return "".join(password)
+
+        else:
+            password = []
+            for i in range(0, length):
+                password.append(random.choice(string.ascii_lowercase))
 
 
 def login_screen(username, password):
@@ -204,7 +257,7 @@ Hello {username} what do you want to do?
                     add_account()
                 case 3:
                     choosing = False
-                    generate_password()
+                    print(f"Your password is: {generate_password()}")
                 case 4:
                     main_menu()
                 case other:
